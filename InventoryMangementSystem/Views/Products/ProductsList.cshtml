@@ -8,7 +8,8 @@
         <div class="page-header">
             <div class="page-title">
                 <h4>Product List</h4>
-                <h6>Manage your products</h6>
+                <h5>Manage your products</h5>
+                <h6>@ViewData["filter"]</h6>
             </div>
             <div class="page-btn" style="display: flex; gap: 10px;">
                 <a asp-area="" asp-controller="Products" asp-action="Create" class="btn btn-added">
@@ -19,9 +20,7 @@
                 </a>
 
             </div>
-
         </div>
-
         <div class="card">
             <div class="card-body">
                 <div class="table-top">

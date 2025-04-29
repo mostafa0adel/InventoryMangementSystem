@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryMangementSystem.Controllers
 {
+    [Authorize]
     public class CategoriesController : Controller
     {
 

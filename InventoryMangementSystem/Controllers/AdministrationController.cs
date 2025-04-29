@@ -1,20 +1,24 @@
 ﻿using InventoryMangementSystem.Models;
 using InventoryMangementSystemEntities.ViewModels.Administration;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryMangementSystem.Controllers
 {
+    [Authorize(Roles = "Administrator")]
     public class AdministrationController : Controller
     {
         private RoleManager<IdentityRole> _roleManager;
         private UserManager<AppUser> _userManager;
+        private IHttpContextAccessor _contextAccessor;
 
-        public AdministrationController(RoleManager<IdentityRole> roleManager, UserManager<AppUser> userManager)
+        public AdministrationController(RoleManager<IdentityRole> roleManager, UserManager<AppUser> userManager, IHttpContextAccessor contextAccessor)
         {
             _roleManager = roleManager;
             _userManager = userManager;
+            _contextAccessor = contextAccessor;
         }
         #region Roles
         public async Task<IActionResult> GetAllRoles()
@@ -131,10 +135,37 @@ namespace InventoryMangementSystem.Controllers
 			}
 			return RedirectToAction("GetAllUsers");
 		}
+        [AllowAnonymous]
+        [Authorize]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+        [AllowAnonymous]
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                string userName = _contextAccessor.HttpContext.User.Identity.Name;
+                var user = await _userManager.FindByNameAsync(userName);
+                var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("Index", "DashBoard");
+                }
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+            return View(model);
+        }
 
 
 
 
-		#endregion
-	}
+        #endregion
+    }
 }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryMangementSystem.Controllers
 {
+   
     public class AccountController : Controller
     {
         private readonly UserManager<AppUser> _userManager;

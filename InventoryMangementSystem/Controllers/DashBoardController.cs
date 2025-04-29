@@ -1,6 +1,7 @@
 ﻿using InventoryMangementSystem.Intefaces;
 using InventoryMangementSystemEntities.Models;
 using InventoryMangementSystemEntities.ViewModels.DashBoard;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace InventoryMangementSystem.Controllers
 {
 
+    [Authorize]
     public class DashBoardController : Controller
     {
 

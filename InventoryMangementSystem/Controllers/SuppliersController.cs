@@ -1,17 +1,72 @@
 ﻿using InventoryMangementSystem.Intefaces;
 using InventoryMangementSystemEntities.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NuGet.Protocol.Core.Types;
 
 namespace InventoryMangementSystem.Controllers
 {
+    [Authorize]
+
     public class SuppliersController : Controller
     {
         private IGenericRepository<Supplier> _SupplierRepository;
-        public SuppliersController(IGenericRepository<Supplier> SupplierRepository)
+        private IGenericRepository<Product> _ProductRepository;
+        private IGenericRepository<Category> _CategoryRepository;
+        public SuppliersController(IGenericRepository<Supplier> SupplierRepository, IGenericRepository<Product> ProductRepository, IGenericRepository<Category> CategoryRepository)
         {
             _SupplierRepository = SupplierRepository;
+            _ProductRepository = ProductRepository;
+            _CategoryRepository = CategoryRepository;
+        }
+
+        // GET: SuppliersController/Report
+        [Authorize(Roles = "Administrator")]
+        public async Task<ActionResult> Report()
+        {
+            try
+            {
+
+                // Get all products and categories
+                var products = await _ProductRepository.GetAllAsync();
+                var categories = await _CategoryRepository.GetAllAsync();
+                var suppliers = await _SupplierRepository.GetAllAsync();
+
+                var result = new List<dynamic>(); // Using dynamic type for flexibility
+
+                foreach (var supplier in suppliers)
+                {
+                    // Get products for the current supplier
+                    var supplierProducts = products.Where(p => p.supplierId == supplier.Id).ToList();
+
+                    // Create a list for product information
+                    var productInfoList = supplierProducts.Select(p => new
+                    {
+                        ProductId = p.Id,
+                        ProductName = p.ProductName,
+                        ProductPrice = p.Price,
+                        ProductImage = p.ProductImage,
+                        QTY = p.StockQuantity,
+                        CategoryName = categories.FirstOrDefault(c => c.Id == p.categoryId)?.CategoryName // Assuming CategoryId is in Product
+                    }).ToList();
+
+                    // Add supplier information with product info
+                    result.Add(new
+                    {
+                        SupplierName = supplier.SupplierName,
+                        Products = productInfoList
+                    });
+                }
+                Console.WriteLine(result);
+                // Now, you can return the supplier report view with the result
+                return View("SupplierReport", result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return View();
+            }
         }
 
         // GET: SuppliersController
@@ -29,6 +84,8 @@ namespace InventoryMangementSystem.Controllers
         }
 
         // GET: SuppliersController/Create
+        [Authorize(Roles = "Administrator")]
+
         public ActionResult Create()
         {
             return View("AddNewSupplier");
