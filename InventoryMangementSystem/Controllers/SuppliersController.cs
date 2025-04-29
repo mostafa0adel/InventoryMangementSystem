@@ -8,12 +8,12 @@ using NuGet.Protocol.Core.Types;
 namespace InventoryMangementSystem.Controllers
 {
     [Authorize]
-
     public class SuppliersController : Controller
     {
         private IGenericRepository<Supplier> _SupplierRepository;
         private IGenericRepository<Product> _ProductRepository;
         private IGenericRepository<Category> _CategoryRepository;
+
         public SuppliersController(IGenericRepository<Supplier> SupplierRepository, IGenericRepository<Product> ProductRepository, IGenericRepository<Category> CategoryRepository)
         {
             _SupplierRepository = SupplierRepository;
@@ -21,13 +21,16 @@ namespace InventoryMangementSystem.Controllers
             _CategoryRepository = CategoryRepository;
         }
 
-        // GET: SuppliersController/Report
+        /// <summary>
+        /// Generates a report of suppliers and their products.
+        /// Only accessible by users with the Administrator role.
+        /// </summary>
+        /// <returns>A view containing the supplier report.</returns>
         [Authorize(Roles = "Administrator")]
         public async Task<ActionResult> Report()
         {
             try
             {
-
                 // Get all products and categories
                 var products = await _ProductRepository.GetAllAsync();
                 var categories = await _CategoryRepository.GetAllAsync();
@@ -69,29 +72,43 @@ namespace InventoryMangementSystem.Controllers
             }
         }
 
-        // GET: SuppliersController
+        /// <summary>
+        /// Displays the list of suppliers.
+        /// </summary>
+        /// <returns>A view containing the list of suppliers.</returns>
         public async Task<ActionResult> Index()
         {
             var suppliers = await _SupplierRepository.GetAllAsync();
             return View("SuppliersList", suppliers);
         }
 
-        // GET: SuppliersController/Details/5
+        /// <summary>
+        /// Displays the details of a specific supplier.
+        /// </summary>
+        /// <param name="id">The ID of the supplier.</param>
+        /// <returns>A view containing the supplier's details.</returns>
         public async Task<ActionResult> Details(int id)
         {
             var supplier = await _SupplierRepository.GetByIdAsync(id);
             return View(supplier);
         }
 
-        // GET: SuppliersController/Create
+        /// <summary>
+        /// Displays the create supplier form.
+        /// Only accessible by users with the Administrator role.
+        /// </summary>
+        /// <returns>A view for creating a new supplier.</returns>
         [Authorize(Roles = "Administrator")]
-
         public ActionResult Create()
         {
             return View("AddNewSupplier");
         }
 
-        // POST: SuppliersController/Create
+        /// <summary>
+        /// Creates a new supplier.
+        /// </summary>
+        /// <param name="item">The supplier information.</param>
+        /// <returns>A redirect to the index action if successful, otherwise displays the create form again.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(Supplier item)
@@ -99,7 +116,7 @@ namespace InventoryMangementSystem.Controllers
             try
             {
                 var Isexists = _SupplierRepository.GetAllAsync().Result.Any(s => s.SupplierName == item.SupplierName);
-                if (Isexists == true)
+                if (Isexists)
                 {
                     ViewBag.ExistsError = "Supplier Already exists";
                     return View("AddNewSupplier");
@@ -111,26 +128,31 @@ namespace InventoryMangementSystem.Controllers
             {
                 return View("AddNewSupplier");
             }
-
         }
 
-        // GET: SuppliersController/Edit/5
+        /// <summary>
+        /// Displays the edit form for a specific supplier.
+        /// </summary>
+        /// <param name="id">The ID of the supplier.</param>
+        /// <returns>A view for editing the supplier.</returns>
         public async Task<ActionResult> Edit(int id)
         {
             var supplier = await _SupplierRepository.GetByIdAsync(id);
             return View(supplier);
         }
 
-
-
-        // POST: SuppliersController/Edit/5
+        /// <summary>
+        /// Updates a specific supplier's information.
+        /// </summary>
+        /// <param name="id">The ID of the supplier.</param>
+        /// <param name="item">The updated supplier information.</param>
+        /// <returns>A redirect to the index action if successful, otherwise displays the edit form again.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(int id, Supplier item)
         {
             try
             {
-
                 await _SupplierRepository.UpdateAsync(item);
                 return RedirectToAction(nameof(Index));
             }
@@ -140,19 +162,27 @@ namespace InventoryMangementSystem.Controllers
             }
         }
 
-
-        // GET: CategoriesController/Delete/5
+        /// <summary>
+        /// Displays the delete confirmation for a specific supplier.
+        /// </summary>
+        /// <param name="id">The ID of the supplier.</param>
+        /// <returns>A view for confirming deletion of the supplier.</returns>
         public async Task<ActionResult> Delete(int id)
         {
             var supplier = await _SupplierRepository.GetByIdAsync(id);
             return View(supplier);
         }
 
-        // POST: CategoriesController/Delete/5
+        /// <summary>
+        /// Deletes a specific supplier.
+        /// </summary>
+        /// <param name="id">The ID of the supplier.</param>
+        /// <param name="collection">Form collection for additional parameters.</param>
+        /// <returns>A redirect to the index action if successful, otherwise displays the delete confirmation again.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-         public async Task<ActionResult> Delete(int id, IFormCollection collection)
-            {
+        public async Task<ActionResult> Delete(int id, IFormCollection collection)
+        {
             try
             {
                 await _SupplierRepository.DeleteAsync(id);
@@ -162,7 +192,6 @@ namespace InventoryMangementSystem.Controllers
             {
                 return View();
             }
-             }
-
+        }
     }
 }
