@@ -52,13 +52,13 @@ namespace InventoryMangementSystem.Controllers
                 .Where(sl => sl.QuantityChange < 0 && sl.ChangeType == "remove")
                 .ToDictionary(sl => sl.ProductId, sl => sl.QuantityChange);
 
-            var removedProducts = products
-                .Where(p => quantityChanges.ContainsKey(p.Id))
-                .Select(p => new
-                {
-                    Product = p,
-                    QuantityChanged = quantityChanges[p.Id]
-                }).ToList();
+			var removedProducts = products
+				.Where(p => quantityChanges.ContainsKey(p.Id))
+				.Select(p => new
+				{
+					Product = p,
+					QuantityChanged = quantityChanges[p.Id]
+				}).ToList();
 
             ViewData["filter"] = "All Products";
             return View("PurchaseReport", removedProducts);
